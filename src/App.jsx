@@ -1,10 +1,14 @@
 import Header from './components/Header.jsx'
+import Hero from './components/Hero.jsx'
 
 function App() {
   return (
-    <div id="home" className="min-h-screen bg-aura-navy">
+    <>
       <Header />
-    </div>
+      <main>
+        <Hero />
+      </main>
+    </>
   )
 }
 
