@@ -1,25 +1,125 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const navigationItems = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Residences', href: '#residences' },
-  { label: 'Gallery', href: '#gallery' },
-  { label: 'Location', href: '#location' },
+  { id: 'home', label: 'Home', href: '#home' },
+  { id: 'about', label: 'About', href: '#about' },
+  { id: 'residences', label: 'Residences', href: '#residences' },
+  { id: 'gallery', label: 'Gallery', href: '#gallery' },
+  { id: 'location', label: 'Location', href: '#location' },
+]
+
+const observedSections = [
+  { id: 'home', navigationId: 'home' },
+  { id: 'about', navigationId: 'about' },
+  { id: 'residences', navigationId: 'residences' },
+  { id: 'gallery', navigationId: 'gallery' },
+  { id: 'location', navigationId: 'location' },
+  { id: 'contact', navigationId: 'location' },
+  { id: 'register-interest', navigationId: 'location' },
 ]
 
 function Header() {
+  const headerRef = useRef(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(() => window.scrollY > 60)
+  const [activeNavigation, setActiveNavigation] = useState('home')
   const closeMenu = () => setIsMenuOpen(false)
 
+  const handleNavigationClick = (navigationId) => {
+    setActiveNavigation(navigationId)
+    closeMenu()
+  }
+
+  useEffect(() => {
+    let observer
+    let resizeFrame
+    const visibleSections = new Map()
+
+    const selectActiveSection = () => {
+      if (window.scrollY <= 1) {
+        setActiveNavigation('home')
+        return
+      }
+
+      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
+      const visibleEntries = [...visibleSections.values()].filter(
+        (entry) => entry.isIntersecting,
+      )
+
+      if (visibleEntries.length === 0) return
+
+      visibleEntries.sort(
+        (firstEntry, secondEntry) =>
+          Math.abs(firstEntry.boundingClientRect.top - headerHeight) -
+          Math.abs(secondEntry.boundingClientRect.top - headerHeight),
+      )
+
+      const activeSection = observedSections.find(
+        (section) => section.id === visibleEntries[0].target.id,
+      )
+
+      if (activeSection) setActiveNavigation(activeSection.navigationId)
+    }
+
+    const createObserver = () => {
+      observer?.disconnect()
+      visibleSections.clear()
+
+      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => visibleSections.set(entry.target.id, entry))
+          selectActiveSection()
+        },
+        {
+          rootMargin: `-${headerHeight}px 0px -45% 0px`,
+          threshold: [0, 0.1, 0.25, 0.5, 0.75],
+        },
+      )
+
+      observedSections.forEach(({ id }) => {
+        const section = document.getElementById(id)
+        if (section) observer.observe(section)
+      })
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 60)
+      if (window.scrollY <= 1) setActiveNavigation('home')
+    }
+
+    const handleResize = () => {
+      window.cancelAnimationFrame(resizeFrame)
+      resizeFrame = window.requestAnimationFrame(createObserver)
+    }
+
+    createObserver()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      observer?.disconnect()
+      window.cancelAnimationFrame(resizeFrame)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
   return (
-    <header className="absolute inset-x-0 top-0 z-50 text-white">
+    <header
+      ref={headerRef}
+      className={`fixed inset-x-0 top-0 z-50 border-b text-white transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 motion-reduce:transition-none ${
+        isScrolled
+          ? 'border-white/10 bg-aura-navy/80 shadow-[0_8px_30px_rgba(3,12,24,0.16)] backdrop-blur-xl'
+          : 'border-transparent bg-transparent shadow-none backdrop-blur-none'
+      }`}
+    >
       <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between gap-4 px-6 md:h-[100px] md:gap-3 md:px-3 min-[840px]:gap-4 min-[840px]:px-4 min-[900px]:gap-5 min-[900px]:px-6 lg:gap-6 lg:px-10">
         <a
           href="#home"
           className="inline-flex shrink-0 flex-col leading-none"
           aria-label="AURA Properties home"
-          onClick={closeMenu}
+          onClick={() => handleNavigationClick('home')}
         >
           <span className="text-[28px] font-light tracking-[0.07em]">
             AURA
@@ -31,12 +131,14 @@ function Header() {
 
         <nav aria-label="Primary navigation" className="hidden md:block">
           <ul className="flex flex-nowrap items-center gap-3 whitespace-nowrap min-[840px]:gap-5 min-[900px]:gap-7 lg:gap-10">
-            {navigationItems.map((item, index) => (
+            {navigationItems.map((item) => (
               <li key={item.label}>
                 <a
                   href={item.href}
+                  aria-current={activeNavigation === item.id ? 'page' : undefined}
+                  onClick={() => handleNavigationClick(item.id)}
                   className={`relative py-2 text-[13px] font-medium uppercase tracking-[0.03em] transition-colors hover:text-white/75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${
-                    index === 0
+                    activeNavigation === item.id
                       ? 'after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white'
                       : ''
                   }`}
@@ -90,8 +192,11 @@ function Header() {
             <li key={item.label} className="border-b border-white/10">
               <a
                 href={item.href}
-                className="block py-4 text-sm font-medium uppercase tracking-[0.05em] transition-colors hover:text-white/70 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
-                onClick={closeMenu}
+                aria-current={activeNavigation === item.id ? 'page' : undefined}
+                className={`block py-4 text-sm font-medium uppercase tracking-[0.05em] transition-colors hover:text-white/70 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white ${
+                  activeNavigation === item.id ? 'underline decoration-1 underline-offset-8' : ''
+                }`}
+                onClick={() => handleNavigationClick(item.id)}
               >
                 {item.label}
               </a>
