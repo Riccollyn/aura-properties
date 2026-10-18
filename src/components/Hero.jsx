@@ -1,4 +1,6 @@
 import heroImage from '../assets/hero.jpg'
+import { navigateToSection } from '../utils/sectionNavigation.js'
+import Reveal from './Reveal.jsx'
 
 function Hero() {
   return (
@@ -20,27 +22,51 @@ function Hero() {
         aria-hidden="true"
       />
 
-      <div className="mx-auto w-full max-w-[1280px] px-6 pt-20 sm:px-8 md:pt-[100px] lg:px-10">
+      <div className="mx-auto w-full max-w-[1280px] px-6 pt-[70px] sm:px-8 md:pt-[90px] lg:px-10">
         <div className="max-w-[650px]">
-          <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.07em] sm:text-xs lg:mb-5 lg:text-[13px]">
+          <Reveal
+            as="p"
+            delay={0}
+            duration={1400}
+            variant="hero"
+            className="mb-4 text-[11px] font-medium uppercase tracking-[0.07em] sm:text-xs lg:mb-5 lg:text-[13px]"
+          >
             A new landmark in Ara Damansara
-          </p>
+          </Reveal>
 
-          <h1
+          <Reveal
+            as="h1"
             id="hero-heading"
+            delay={200}
+            duration={1400}
+            variant="hero"
             className="font-serif text-[42px] leading-[0.98] font-normal tracking-[-0.025em] sm:text-[52px] lg:text-[64px]"
           >
             <span className="block">A Higher</span>
             <span className="block">Standard of Living</span>
-          </h1>
+          </Reveal>
 
-          <p className="mt-6 max-w-[390px] text-[15px] leading-relaxed text-white/90 sm:text-base lg:mt-7 lg:text-[17px]">
+          <Reveal
+            as="p"
+            delay={400}
+            duration={1400}
+            variant="hero"
+            className="mt-6 max-w-[390px] text-[15px] leading-relaxed text-white/90 sm:text-base lg:mt-7 lg:text-[17px]"
+          >
             <span className="block">Modern residences. Thoughtful spaces.</span>
             <span className="block">A more connected tomorrow.</span>
-          </p>
+          </Reveal>
 
-          <a
+          <Reveal
+            as="a"
             href="#about"
+            onClick={(event) => {
+              event.preventDefault()
+              navigateToSection('about')
+            }}
+            delay={600}
+            duration={1400}
+            variant="hero"
             className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-lg bg-white px-6 text-sm font-medium text-aura-navy transition-colors hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white lg:mt-10"
           >
             Explore Development
@@ -54,7 +80,7 @@ function Hero() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 10h12m-4-4 4 4-4 4" />
             </svg>
-          </a>
+          </Reveal>
         </div>
       </div>
     </section>

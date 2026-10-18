@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { navigateToSection } from '../utils/sectionNavigation.js'
 
 const navigationItems = [
   { id: 'home', label: 'Home', href: '#home' },
@@ -21,6 +22,7 @@ const observedSections = [
 function Header() {
   const headerRef = useRef(null)
   const navigationLockRef = useRef(null)
+  const navigationCancelRef = useRef(null)
   const scrollEndTimerRef = useRef(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(() => window.scrollY > 60)
@@ -29,27 +31,16 @@ function Header() {
 
   const handleNavigationClick = (event, item) => {
     event.preventDefault()
-    setActiveNavigation(item.id)
+    setActiveNavigation(item.navigationId ?? item.id)
     closeMenu()
 
     const destination = document.getElementById(item.id)
     navigationLockRef.current = destination ? item.id : null
     window.clearTimeout(scrollEndTimerRef.current)
 
-    if (window.location.hash !== item.href) {
-      window.history.pushState(null, '', item.href)
-    }
-
     if (!destination) return
 
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
-
-    destination.scrollIntoView({
-      behavior: prefersReducedMotion ? 'instant' : 'smooth',
-      block: 'start',
-    })
+    navigationCancelRef.current = navigateToSection(item.id)
   }
 
   useEffect(() => {
@@ -65,7 +56,7 @@ function Header() {
         return
       }
 
-      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
+      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 90
       const visibleEntries = [...visibleSections.values()].filter(
         (entry) => entry.isIntersecting,
       )
@@ -89,7 +80,7 @@ function Header() {
       observer?.disconnect()
       visibleSections.clear()
 
-      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
+      const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 90
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => visibleSections.set(entry.target.id, entry))
@@ -113,8 +104,13 @@ function Header() {
       const lockedNavigationId = navigationLockRef.current
       if (lockedNavigationId) {
         const destination = document.getElementById(lockedNavigationId)
-        const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
-        const expectedTop = lockedNavigationId === 'home' ? 0 : headerHeight
+        const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 90
+        const destinationScrollMargin = destination
+          ? Number.parseFloat(window.getComputedStyle(destination).scrollMarginTop) ||
+            headerHeight
+          : headerHeight
+        const expectedTop =
+          lockedNavigationId === 'home' ? 0 : destinationScrollMargin
         const destinationReached =
           destination &&
           (Math.abs(destination.getBoundingClientRect().top - expectedTop) <= 8 ||
@@ -168,6 +164,7 @@ function Header() {
 
     return () => {
       observer?.disconnect()
+      navigationCancelRef.current?.()
       window.cancelAnimationFrame(resizeFrame)
       window.clearTimeout(scrollEndTimerRef.current)
       window.removeEventListener('scroll', handleScroll)
@@ -187,7 +184,7 @@ function Header() {
           : 'border-transparent bg-transparent shadow-none backdrop-blur-none'
       }`}
     >
-      <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between gap-4 px-6 md:h-[100px] md:gap-3 md:px-3 min-[840px]:gap-4 min-[840px]:px-4 min-[900px]:gap-5 min-[900px]:px-6 lg:gap-6 lg:px-10">
+      <div className="mx-auto flex h-[70px] max-w-[1280px] items-center justify-between gap-4 px-6 md:h-[90px] md:gap-3 md:px-3 min-[840px]:gap-4 min-[840px]:px-4 min-[900px]:gap-5 min-[900px]:px-6 lg:gap-6 lg:px-10">
         <a
           href="#home"
           className="inline-flex shrink-0 flex-col leading-none"
@@ -226,6 +223,12 @@ function Header() {
         <a
           href="#register-interest"
           className="hidden min-h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-lg border border-white/80 px-6 text-[13px] font-medium uppercase tracking-[0.03em] transition-colors hover:bg-white hover:text-aura-navy focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:inline-flex"
+          onClick={(event) =>
+            handleNavigationClick(event, {
+              id: 'register-interest',
+              navigationId: 'location',
+            })
+          }
         >
           Register Interest
         </a>
@@ -279,7 +282,12 @@ function Header() {
             <a
               href="#register-interest"
               className="flex min-h-12 w-full items-center justify-center rounded-lg border border-white/80 px-5 text-sm font-medium uppercase tracking-[0.04em] transition-colors hover:bg-white hover:text-aura-navy focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              onClick={closeMenu}
+              onClick={(event) =>
+                handleNavigationClick(event, {
+                  id: 'register-interest',
+                  navigationId: 'location',
+                })
+              }
             >
               Register Interest
             </a>

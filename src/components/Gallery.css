@@ -1,7 +1,7 @@
 @media (max-width: 767px) {
   .gallery-section {
     display: flex;
-    height: calc(100dvh - 80px);
+    height: calc(100dvh - 70px);
     min-height: 0;
     flex-direction: column;
     overflow: hidden;

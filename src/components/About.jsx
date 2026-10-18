@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
-import aboutVideo from '../assets/about.mp4'
+import aboutVideo from '../assets/about-optimized.mp4'
 import aboutPoster from '../assets/about-poster.jpg'
+import { navigateToSection } from '../utils/sectionNavigation.js'
+import Reveal from './Reveal.jsx'
 
 const features = [
   {
@@ -61,10 +63,10 @@ function About() {
   }
 
   return (
-    <section id="about" className="scroll-mt-20 bg-white py-20 text-aura-navy sm:py-24 md:scroll-mt-[100px] lg:py-32" aria-labelledby="about-heading">
+    <section id="about" className="scroll-mt-[70px] bg-white py-20 text-aura-navy sm:py-24 md:scroll-mt-[90px] lg:flex lg:min-h-[100dvh] lg:items-center lg:py-32" aria-labelledby="about-heading">
       <div className="mx-auto w-full max-w-[1280px] px-6 sm:px-8 lg:px-10">
         <div className="grid items-center gap-12 md:grid-cols-[0.8fr_1.2fr] md:gap-10 lg:gap-20">
-          <div className="max-w-[520px]">
+          <Reveal duration={1500} className="max-w-[520px]">
             <p className="mb-4 text-xs font-medium uppercase tracking-[0.12em] text-[#9f7d50]">
               About AURA
             </p>
@@ -77,6 +79,10 @@ function About() {
             </p>
             <a
               href="#residences"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateToSection('residences')
+              }}
               className="mt-7 inline-flex min-h-12 items-center gap-3 border border-slate-400 px-5 text-sm font-medium transition-colors hover:border-aura-navy hover:bg-aura-navy hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aura-navy"
             >
               View Residences
@@ -84,12 +90,17 @@ function About() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 10h12m-4-4 4 4-4 4" />
               </svg>
             </a>
-          </div>
+          </Reveal>
 
-          <div className="relative overflow-hidden rounded-2xl bg-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
+          <Reveal
+            delay={200}
+            duration={1500}
+            variant="fade"
+            className="relative overflow-hidden rounded-lg bg-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.16)]"
+          >
             <video
               ref={videoRef}
-              className="aspect-video w-full object-cover"
+              className="aspect-video w-full rounded-lg object-cover"
               poster={aboutPoster}
               preload="none"
               playsInline
@@ -114,7 +125,7 @@ function About() {
                 </span>
               </button>
             )}
-          </div>
+          </Reveal>
         </div>
 
         <ul className="mt-16 grid gap-8 border-t border-slate-200 pt-10 sm:grid-cols-3 sm:gap-0 lg:mt-20 lg:pt-12">

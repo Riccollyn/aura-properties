@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import locationMap from '../assets/AURA Properties Kuala Lumpur Location Map.png'
+import Reveal from './Reveal.jsx'
 
 function Location() {
   const [submissionMessage, setSubmissionMessage] = useState('')
@@ -14,7 +15,7 @@ function Location() {
   return (
     <section
       id="location"
-      className="scroll-mt-20 bg-[#172536] py-16 sm:py-20 md:scroll-mt-[108px] md:pt-28 md:pb-20 lg:pt-28 lg:pb-20"
+      className="scroll-mt-[70px] bg-[#172536] py-16 sm:py-20 md:scroll-mt-[98px] md:pt-28 md:pb-20 lg:flex lg:min-h-[100dvh] lg:items-center lg:pt-28 lg:pb-20"
       aria-labelledby="location-heading"
     >
       <div className="mx-auto grid w-full max-w-[1280px] min-w-0 items-center gap-12 px-5 sm:px-8 md:grid-cols-[minmax(0,1fr)_minmax(320px,0.82fr)] md:gap-8 lg:max-w-[1180px] lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-12 lg:px-10 xl:gap-14">
@@ -22,19 +23,32 @@ function Location() {
           <p className="mb-3 text-[0.7rem] font-semibold tracking-[0.18em] text-[#bd9868] uppercase">
             Location
           </p>
-          <h2
+          <Reveal
+            as="h2"
             id="location-heading"
+            duration={1000}
             className="font-serif text-[2.35rem] leading-[1.05] font-normal tracking-[-0.02em] text-white sm:text-[2.75rem] lg:text-[2.625rem]"
           >
             Perfectly Connected
-          </h2>
-          <p className="mt-4 max-w-[640px] text-sm leading-6 text-slate-300 sm:text-[15px]">
+          </Reveal>
+          <Reveal
+            as="p"
+            delay={120}
+            duration={1000}
+            className="mt-4 max-w-[640px] text-sm leading-6 text-slate-300 sm:text-[15px]"
+          >
             Positioned for convenient city living in Greater Kuala Lumpur,
             AURA offers a well-connected home base within the established Ara
             Damansara neighbourhood.
-          </p>
+          </Reveal>
 
-          <figure className="mt-6 min-w-0 overflow-hidden rounded-md bg-slate-100 shadow-[0_18px_45px_rgba(3,12,24,0.22)] sm:mt-7 lg:max-w-[590px]">
+          <Reveal
+            as="figure"
+            delay={240}
+            duration={1100}
+            variant="fade"
+            className="mt-6 min-w-0 overflow-hidden rounded-md bg-slate-100 shadow-[0_18px_45px_rgba(3,12,24,0.22)] sm:mt-7 lg:max-w-[590px]"
+          >
             <img
               src={locationMap}
               alt="Map showing the location of AURA Properties in Ara Damansara within Greater Kuala Lumpur"
@@ -46,12 +60,14 @@ function Location() {
               AURA Properties location map for Ara Damansara and surrounding
               areas.
             </figcaption>
-          </figure>
+          </Reveal>
         </div>
 
-        <div
+        <Reveal
           id="register-interest"
-          className="w-full scroll-mt-24 rounded-md bg-white p-6 text-aura-navy shadow-[0_20px_55px_rgba(3,12,24,0.24)] sm:p-8 md:max-w-[440px] md:scroll-mt-[108px] md:justify-self-end lg:p-8"
+          delay={120}
+          duration={1000}
+          className="w-full scroll-mt-[86px] rounded-md bg-white p-6 text-aura-navy shadow-[0_20px_55px_rgba(3,12,24,0.24)] sm:p-8 md:max-w-[440px] md:scroll-mt-[98px] md:justify-self-end lg:p-8"
         >
           <p className="text-[0.7rem] font-semibold tracking-[0.16em] text-[#a88455] uppercase">
             Register Interest
@@ -126,7 +142,7 @@ function Location() {
               By submitting, you acknowledge our Privacy Policy.
             </p>
           </form>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

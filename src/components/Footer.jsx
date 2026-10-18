@@ -1,3 +1,6 @@
+import { navigateToSection } from '../utils/sectionNavigation.js'
+import Reveal from './Reveal.jsx'
+
 const footerNavigation = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
@@ -44,11 +47,19 @@ function PhoneIcon() {
 function Footer() {
   return (
     <footer className="bg-[#151d26] text-white/70">
-      <div className="mx-auto w-full max-w-[1280px] px-5 pt-10 pb-6 sm:px-8 md:pt-12 lg:px-12 lg:pt-14">
+      <Reveal
+        variant="fade"
+        duration={700}
+        className="mx-auto w-full max-w-[1280px] px-5 pt-10 pb-6 sm:px-8 md:pt-12 lg:px-12 lg:pt-14"
+      >
         <div className="grid gap-6 md:grid-cols-2 md:gap-x-10 md:gap-y-8 lg:grid-cols-[minmax(250px,1fr)_auto_minmax(250px,1fr)] lg:items-center lg:gap-10">
           <div>
             <a
               href="#home"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateToSection('home')
+              }}
               className="inline-flex flex-col text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bd9868]"
               aria-label="AURA Properties home"
             >
@@ -73,6 +84,10 @@ function Footer() {
                 <li key={item.href}>
                   <a
                     href={item.href}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      navigateToSection(item.href.slice(1))
+                    }}
                     className="transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bd9868] motion-reduce:transition-none"
                   >
                     {item.label}
@@ -115,7 +130,7 @@ function Footer() {
             Privacy Policy
           </span>
         </div>
-      </div>
+      </Reveal>
     </footer>
   )
 }

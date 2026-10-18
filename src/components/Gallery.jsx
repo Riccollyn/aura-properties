@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import exteriorImageLarge from '../assets/gallery/exterior_1-1600.jpg'
 import exteriorImageSmall from '../assets/gallery/exterior_1-800.jpg'
@@ -12,7 +12,9 @@ import interiorImageLarge from '../assets/gallery/interior_1-1600.jpg'
 import interiorImageSmall from '../assets/gallery/interior_1-800.jpg'
 import restaurantImageLarge from '../assets/gallery/restaurant_1-1600.jpg'
 import restaurantImageSmall from '../assets/gallery/restaurant_1-800.jpg'
+import useReveal from '../hooks/useReveal.js'
 import './Gallery.css'
+import Reveal from './Reveal.jsx'
 
 const filters = ['All', 'Exterior', 'Interior', 'Facilities', 'Lifestyle']
 
@@ -63,7 +65,7 @@ const galleryImages = [
 
 function Gallery() {
   const [activeFilter, setActiveFilter] = useState('All')
-  const galleryScrollRef = useRef(null)
+  const galleryScrollRef = useReveal()
 
   const visibleImages =
     activeFilter === 'All'
@@ -78,11 +80,14 @@ function Gallery() {
   return (
     <section
       id="gallery"
-      className="gallery-section scroll-mt-20 bg-white py-16 sm:py-20 md:scroll-mt-[100px] lg:py-24"
+      className="gallery-section scroll-mt-[70px] bg-white py-16 sm:py-20 md:scroll-mt-[90px] lg:flex lg:min-h-[100dvh] lg:items-center lg:py-24"
       aria-labelledby="gallery-heading"
     >
       <div className="gallery-content mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-12">
-        <div className="gallery-controls flex min-w-0 flex-col gap-7 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+        <Reveal
+          duration={1000}
+          className="gallery-controls flex min-w-0 flex-col gap-7 lg:flex-row lg:items-end lg:justify-between lg:gap-10"
+        >
           <div className="min-w-0 shrink-0">
             <p className="mb-2 text-[0.7rem] font-semibold tracking-[0.18em] text-[#9f7d50] uppercase">
               Gallery
@@ -96,7 +101,7 @@ function Gallery() {
           </div>
 
           <div
-            className="flex min-w-0 max-w-full flex-wrap gap-2 sm:gap-3 lg:justify-end"
+            className="grid w-full min-w-0 max-w-full grid-cols-5 gap-1 md:flex md:w-auto md:flex-wrap md:justify-start md:gap-3 lg:justify-end"
             role="group"
             aria-label="Filter gallery by category"
           >
@@ -110,7 +115,7 @@ function Gallery() {
                   aria-label={`Show ${filter.toLowerCase()} gallery images`}
                   aria-pressed={isActive}
                   onClick={() => selectFilter(filter)}
-                  className={`min-h-10 rounded-[3px] border px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aura-navy motion-reduce:transition-none sm:px-5 ${
+                  className={`min-h-9 w-full min-w-0 whitespace-nowrap rounded-[3px] border px-1 py-1.5 text-center text-[0.625rem] font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aura-navy motion-reduce:transition-none md:min-h-10 md:w-auto md:min-w-max md:px-5 md:py-2 md:text-sm ${
                     isActive
                       ? 'border-aura-navy bg-aura-navy text-white'
                       : 'border-slate-200 bg-white text-aura-navy hover:border-slate-400'
@@ -121,7 +126,7 @@ function Gallery() {
               )
             })}
           </div>
-        </div>
+        </Reveal>
 
         <p className="sr-only" aria-live="polite">
           Showing {visibleImages.length} {activeFilter.toLowerCase()} gallery
@@ -130,7 +135,8 @@ function Gallery() {
 
         <div
           ref={galleryScrollRef}
-          className="gallery-scroll relative mt-8 w-full min-w-0 max-w-full"
+          className="site-reveal site-reveal--fade gallery-scroll relative mt-8 w-full min-w-0 max-w-full"
+          style={{ '--reveal-duration': '1100ms', '--reveal-delay': '0ms' }}
           aria-label={`${activeFilter} property gallery`}
         >
           <div className="gallery-grid w-full min-w-0 max-w-full">
