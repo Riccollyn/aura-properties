@@ -20,14 +20,36 @@ const observedSections = [
 
 function Header() {
   const headerRef = useRef(null)
+  const navigationLockRef = useRef(null)
+  const scrollEndTimerRef = useRef(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(() => window.scrollY > 60)
   const [activeNavigation, setActiveNavigation] = useState('home')
   const closeMenu = () => setIsMenuOpen(false)
 
-  const handleNavigationClick = (navigationId) => {
-    setActiveNavigation(navigationId)
+  const handleNavigationClick = (event, item) => {
+    event.preventDefault()
+    setActiveNavigation(item.id)
     closeMenu()
+
+    const destination = document.getElementById(item.id)
+    navigationLockRef.current = destination ? item.id : null
+    window.clearTimeout(scrollEndTimerRef.current)
+
+    if (window.location.hash !== item.href) {
+      window.history.pushState(null, '', item.href)
+    }
+
+    if (!destination) return
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+
+    destination.scrollIntoView({
+      behavior: prefersReducedMotion ? 'instant' : 'smooth',
+      block: 'start',
+    })
   }
 
   useEffect(() => {
@@ -36,6 +58,8 @@ function Header() {
     const visibleSections = new Map()
 
     const selectActiveSection = () => {
+      if (navigationLockRef.current) return
+
       if (window.scrollY <= 1) {
         setActiveNavigation('home')
         return
@@ -85,7 +109,49 @@ function Header() {
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 60)
+
+      const lockedNavigationId = navigationLockRef.current
+      if (lockedNavigationId) {
+        const destination = document.getElementById(lockedNavigationId)
+        const headerHeight = headerRef.current?.firstElementChild?.offsetHeight ?? 100
+        const expectedTop = lockedNavigationId === 'home' ? 0 : headerHeight
+        const destinationReached =
+          destination &&
+          (Math.abs(destination.getBoundingClientRect().top - expectedTop) <= 8 ||
+            window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2)
+
+        window.clearTimeout(scrollEndTimerRef.current)
+
+        if (destinationReached) {
+          navigationLockRef.current = null
+        } else {
+          scrollEndTimerRef.current = window.setTimeout(() => {
+            navigationLockRef.current = null
+            selectActiveSection()
+          }, 180)
+        }
+
+        return
+      }
+
       if (window.scrollY <= 1) setActiveNavigation('home')
+    }
+
+    const handleScrollInterruption = (event) => {
+      if (!navigationLockRef.current) return
+
+      if (
+        event.type === 'keydown' &&
+        !['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(
+          event.key,
+        )
+      ) {
+        return
+      }
+
+      navigationLockRef.current = null
+      window.clearTimeout(scrollEndTimerRef.current)
+      window.requestAnimationFrame(selectActiveSection)
     }
 
     const handleResize = () => {
@@ -96,12 +162,19 @@ function Header() {
     createObserver()
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleResize)
+    window.addEventListener('wheel', handleScrollInterruption, { passive: true })
+    window.addEventListener('touchstart', handleScrollInterruption, { passive: true })
+    window.addEventListener('keydown', handleScrollInterruption)
 
     return () => {
       observer?.disconnect()
       window.cancelAnimationFrame(resizeFrame)
+      window.clearTimeout(scrollEndTimerRef.current)
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('wheel', handleScrollInterruption)
+      window.removeEventListener('touchstart', handleScrollInterruption)
+      window.removeEventListener('keydown', handleScrollInterruption)
     }
   }, [])
 
@@ -119,7 +192,7 @@ function Header() {
           href="#home"
           className="inline-flex shrink-0 flex-col leading-none"
           aria-label="AURA Properties home"
-          onClick={() => handleNavigationClick('home')}
+          onClick={(event) => handleNavigationClick(event, navigationItems[0])}
         >
           <span className="text-[28px] font-light tracking-[0.07em]">
             AURA
@@ -136,7 +209,7 @@ function Header() {
                 <a
                   href={item.href}
                   aria-current={activeNavigation === item.id ? 'page' : undefined}
-                  onClick={() => handleNavigationClick(item.id)}
+                  onClick={(event) => handleNavigationClick(event, item)}
                   className={`relative py-2 text-[13px] font-medium uppercase tracking-[0.03em] transition-colors hover:text-white/75 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${
                     activeNavigation === item.id
                       ? 'after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white'
@@ -196,7 +269,7 @@ function Header() {
                 className={`block py-4 text-sm font-medium uppercase tracking-[0.05em] transition-colors hover:text-white/70 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white ${
                   activeNavigation === item.id ? 'underline decoration-1 underline-offset-8' : ''
                 }`}
-                onClick={() => handleNavigationClick(item.id)}
+                onClick={(event) => handleNavigationClick(event, item)}
               >
                 {item.label}
               </a>
